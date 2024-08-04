@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from "react";
 import { Box, Stack, Typography, Button, Modal, TextField} from '@mui/material';
-import { db } from '../../firebase';
+import { auth, db } from '../../firebase';
 import { collection, doc, getDocs, query, setDoc, deleteDoc, getDoc } from 'firebase/firestore'
 import { parseName } from '../../helper'
 
@@ -26,13 +26,14 @@ const style = {
 
 
 export default function Main() {
+  const collectName = "items+" + auth.currentUser?.email;
   //state
   const [inventory, setInventory] = useState<Inventory[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [itemName, setItemName] = useState<string>('');
   //fetch inventory data from firestore
   const updateInventory = async () => {
-    const snapshot = query(collection(db, 'inventory'));
+    const snapshot = query(collection(db, collectName));
     const docs = await getDocs(snapshot);
     const inventoryList: Inventory[] = [];
     docs.forEach((doc) => inventoryList.push({name: doc.data().name, quantity: doc.data().quantity}));
@@ -46,7 +47,7 @@ async function addItem(itemName:string) {
     alert("Please enter a valid name");
     return;
   }
-  const docRef = doc(collection(db, 'inventory'), itemName);
+  const docRef = doc(collection(db, collectName), itemName);
   const docSnap = await getDoc(docRef);
   if(docSnap.exists()) {
       const { quantity } = docSnap.data();
@@ -58,7 +59,7 @@ async function addItem(itemName:string) {
 }
 //remove item
 const removeItem = async (itemName: string) => {
-  const docRef = doc(collection(db, 'inventory'), itemName);
+  const docRef = doc(collection(db, collectName), itemName);
   const docSnap = await getDoc(docRef);
   if(docSnap.exists()) {
       const { quantity } = docSnap.data();

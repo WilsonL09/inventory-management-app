@@ -1,6 +1,6 @@
-import { Avatar, Box, Button, Checkbox, Container, FormControlLabel, Grid, Link, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Container, FormControlLabel, Grid, Link, TextField, Typography } from "@mui/material";
 import { auth } from '@/firebase.js'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, browserSessionPersistence, setPersistence } from "firebase/auth";
 import React, { useState } from "react";
 type loginPageProps = {
   setDisplay: React.Dispatch<React.SetStateAction<number>>;
@@ -27,20 +27,26 @@ export default function LoginPage({setDisplay} : loginPageProps) {
         await createUserWithEmailAndPassword(auth, signupEmail, signupPassword1);
 
         setDisplay(1);
-      } catch (error) {
-        console.error(error);
-        alert("Something went wrong");
+      } catch (error: unknown) {
+        if(error instanceof Error)
+          alert(error.message);
       }
   }
   async function signin() {
+
+    if(signinPassword.length < 6) {
+      alert("Password need to be at least 6 characters");
+      return;
+    }
     try {
+      await setPersistence( auth, browserSessionPersistence);
       await signInWithEmailAndPassword(auth, signinEmail, signinPassword);
-    } catch(error) {
-      console.error(error);
-        alert("Something went wrong");
+      setDisplay(1);
+    } catch(error: unknown) {
+      if(error instanceof Error)
+        alert(error.message);
     }
   }
-  
   return(
       <Box className="w-screen h-[90vh] overflow-hidden">
         <Container component="main" className="flex flex-row justify-evenly">
@@ -72,10 +78,6 @@ export default function LoginPage({setDisplay} : loginPageProps) {
               autoComplete="current-password"
               onChange={(e)=>setSigninPassword(e.target.value)}
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
             <Button
               type="submit"
               fullWidth
@@ -88,11 +90,6 @@ export default function LoginPage({setDisplay} : loginPageProps) {
             >
               Sign In
             </Button>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid> 
           </Box>
         </Box>
       {/* sign up */}
