@@ -1,4 +1,9 @@
 
+export type Inventory = {
+    name : string,
+    quantity: number,
+}
+
 export function parseName(name: string):string {
     name = name.trim();
     if(name.length == 0)

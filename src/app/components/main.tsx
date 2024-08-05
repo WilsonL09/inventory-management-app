@@ -3,12 +3,8 @@ import { useEffect, useState } from "react";
 import { Box, Stack, Typography, Button, Modal, TextField} from '@mui/material';
 import { auth, db } from '../../firebase';
 import { collection, doc, getDocs, query, setDoc, deleteDoc, getDoc } from 'firebase/firestore'
-import { parseName } from '../../helper'
+import { parseName, type Inventory } from '../../helper';
 
-type Inventory = {
-  name : string,
-  quantity: number,
-}
 const style = {
   position: 'absolute',
   top: '50%',
@@ -24,8 +20,10 @@ const style = {
   gap: 3,
 }
 
-
-export default function Main() {
+type MainPageProps = {
+    search: string
+}
+export default function Main( {search}: MainPageProps) {
   const collectName = "items+" + auth.currentUser?.email;
   //state
   const [inventory, setInventory] = useState<Inventory[]>([]);
@@ -131,7 +129,7 @@ return (
               </Typography><br/>
           </Box>
           <Stack className=" w-200 h-75 max-h-5/6 overflow-auto" spacing={2}>
-              {inventory.map(({name, quantity}) => (
+              {inventory.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).map(({name, quantity}) => (
                   <Box
                   key={name}
                   className="w-full min-h-20 flex justify-between items-center bg-[#f0f0f0] px-5">
