@@ -3,10 +3,11 @@ import { auth } from '@/firebase.js'
 import { Box, Button, Typography, TextField } from "@mui/material";
 
 type NavProps = {
+    display: number
     setDisplay: React.Dispatch<React.SetStateAction<number>>,
     setSearch: React.Dispatch<React.SetStateAction<string>>
 }
-export default function Nav({setDisplay, setSearch} : NavProps) {
+export default function Nav({display, setDisplay, setSearch} : NavProps) {
     function navToHome() {
         const user = auth.currentUser;
         if(user) {
@@ -36,9 +37,12 @@ export default function Nav({setDisplay, setSearch} : NavProps) {
         </Box>
         <Box className=" flex-1 px-20">
             <TextField 
+            color='secondary'
             fullWidth 
             placeholder='Search' 
-            onChange={(e) => changeFilterState(e.target.value)}>
+            onChange={(e) => changeFilterState(e.target.value)}
+            className={display === 0 ? 'hidden' : 'block'}>
+
 
             </TextField>
         </Box>

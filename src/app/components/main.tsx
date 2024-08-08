@@ -29,6 +29,8 @@ export default function Main( {search}: MainPageProps) {
   const [inventory, setInventory] = useState<Inventory[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [itemName, setItemName] = useState<string>('');
+  //number to add
+  const [addCount, setAddCount] = useState<number>(1);
   //fetch inventory data from firestore
   const updateInventory = async () => {
     const snapshot = query(collection(db, collectName));
@@ -39,7 +41,7 @@ export default function Main( {search}: MainPageProps) {
 };
 useEffect(()=>{updateInventory()},[]);
 //add item
-async function addItem(itemName:string) {
+async function addItem(itemName:string, addCount: number) {
     itemName = parseName(itemName);
   if(itemName === "") {
     alert("Please enter a valid name");
@@ -49,9 +51,9 @@ async function addItem(itemName:string) {
   const docSnap = await getDoc(docRef);
   if(docSnap.exists()) {
       const { quantity } = docSnap.data();
-      await setDoc(docRef, {name: itemName, quantity: quantity+1 });
+      await setDoc(docRef, {name: itemName, quantity: quantity+addCount });
   } else {
-      await setDoc(docRef, {name: itemName, quantity: 1})
+      await setDoc(docRef, {name: itemName, quantity: addCount})
   }
   await updateInventory();
 }
@@ -97,14 +99,19 @@ return (
                   <Button 
                   variant="outlined"
                   onClick={()=>{
-                      addItem(itemName);
+                      addItem(itemName, addCount);
                       setItemName('');
+                      setAddCount(1);
                       handleClose();
                   }}>
                       Add
                   </Button>
-
               </Stack>
+              <Box>
+                <Typography>Quantity: {addCount}</Typography>
+                <Button onClick={()=>setAddCount(addCount+1)} variant="outlined">+1</Button>
+                <Button onClick={()=>setAddCount(addCount-1)} variant="outlined" disabled={addCount === 1 ? true : false}>-1</Button>
+              </Box>
           </Box>
       </Modal>
       <Button variant="contained" onClick={handleOpen} className="mt-4 mb-2 self-end mr-[4%]">
@@ -122,7 +129,7 @@ return (
                   Item
               </Typography><br/>
               <Typography variant={'h5'} className="flex-1 underline">
-                  Quantity
+                  Count
               </Typography><br/>
               <Typography variant={'h5'} className="underline">
                   Removal
